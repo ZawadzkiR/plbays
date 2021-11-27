@@ -1,13 +1,13 @@
 from datetime import timedelta, datetime, date
 
-def isBussinesDay(date='today'):
+def isBusinessDay(date='today'):
   """
   Default: last business day of today
 
   Examples:
 
-  isBussinesDay() or isBussinesDay('today')
-  isBussinesDay('2021-11-12')
+  isBusinessDay() or isBusinessDay('today')
+  isBusinessDay('2021-11-12')
 
   """
 
@@ -52,7 +52,7 @@ def lastBD(date='today'):
   i=1
   bd=False
   while bd != True:
-    if isBussinesDay((datetime.strptime(date, '%Y-%m-%d') - timedelta(i)).strftime("%Y-%m-%d")) == True:
+    if isBusinessDay((datetime.strptime(date, '%Y-%m-%d') - timedelta(i)).strftime("%Y-%m-%d")) == True:
       bd = True
       return((datetime.strptime(date, '%Y-%m-%d') - timedelta(i)).strftime("%Y-%m-%d"))
 
@@ -78,5 +78,5 @@ def BDays_list(start_date, end_date):
   start_date = datetime.strptime(start_date, '%Y-%m-%d')
   end_date = datetime.strptime(end_date, '%Y-%m-%d')
   for single_date in daterange(start_date, end_date):
-    df_list.append([single_date.strftime("%Y-%m-%d"), isBussinesDay(single_date.strftime("%Y-%m-%d"))])
+    df_list.append([single_date.strftime("%Y-%m-%d"), isBusinessDay(single_date.strftime("%Y-%m-%d"))])
   return list_
