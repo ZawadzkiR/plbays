@@ -14,3 +14,4 @@ lastBD ('2011-11-11')
 BDays_list (start_date, end_date) - returns a list with True and False values for a given range of days
 Examples
 BDays_list ('2021-01-01', '2021-12-31')
+<h1>D</h1>
