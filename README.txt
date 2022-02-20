@@ -1,3 +1,7 @@
+Install:
+pip install plbdays
+
+
 Simple functions showing information about business days in Poland.
 
 isBusinessDay() - Returns True or False if the day is a business day
