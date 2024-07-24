@@ -11,7 +11,7 @@ classifiers = [
 
 setup(
     name='plbdays',
-    version='0.0.1',
+    version='1.1.0',
     author='Robert Zawadzki',
     author_email='r.zawadzki96@gmail.com',
     description='Business days in Poland',
@@ -23,6 +23,5 @@ setup(
     },
     License='MIT',
     packages=find_packages(),
-    install_requires=['datetime'],
     keywords = 'business days'
 )
