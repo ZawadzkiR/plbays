@@ -15,7 +15,7 @@ setup(
     author='Robert Zawadzki',
     author_email='r.zawadzki96@gmail.com',
     description='Business days in Poland',
-    long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),
+    long_description=open('README.md').read() + '\n\n' + open('CHANGELOG.txt').read(),
     long_description_content_type="text/markdown",
     url='https://github.com/ZawadzkiR/plbays/',
     project_urls = {
