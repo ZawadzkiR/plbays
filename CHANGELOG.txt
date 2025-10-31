@@ -1,7 +1,10 @@
 Change Log
 ==========
+1.2.0 (31/10/2025)
+-------------------
+-Including December 24th as a public holiday starting from 2025
 
-0.0.1 (25/07/2024)
+1.1.1 (25/07/2024)
 -------------------
 -Add nextBD() function
 

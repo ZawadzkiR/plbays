@@ -1,108 +1,89 @@
-from datetime import timedelta, datetime, date
+from datetime import timedelta, datetime, date as _date
 
-def isBusinessDay(date='today'):
+def _to_ymd(d):
+    """Zwraca string 'YYYY-MM-DD' dla wejścia: 'today' | str | datetime | date."""
+    if d == 'today':
+        return datetime.today().strftime('%Y-%m-%d')
+    if isinstance(d, (datetime, _date)):
+        return d.strftime('%Y-%m-%d')
+    return d  # zakładamy format 'YYYY-MM-DD'
+
+def isBusinessDay(d='today'):
     """
-    Check if a given date is a business day.
-
-    A business day is defined as a weekday (Monday through Friday) that is not a public holiday.
-    Public holidays are predefined and include New Year's Day, Epiphany, Easter, Whit Monday, 
-    Labor Day, Constitution Day, Assumption Day, All Saints' Day, Independence Day, Christmas, and Boxing Day.
-
-    Parameters:
-    date (str or datetime): The date to check in 'YYYY-MM-DD' format or as a datetime object. Defaults to 'today'.
-
-    Returns:
-    bool: True if the date is a business day, False otherwise.
+    Sprawdza czy dzień jest roboczy w PL.
+    Dniem roboczym jest pon-pt bez świąt ustawowych.
+    Od 2025-01-01 Wigilia (12-24) jest wolna.
     """
-    if date == 'today':
-        date = datetime.today().strftime('%Y-%m-%d')
+    d = _to_ymd(d)
+    year = int(datetime.strptime(d, '%Y-%m-%d').strftime('%Y'))
 
-    year = int(datetime.strptime(date, '%Y-%m-%d').strftime("%Y"))
-    easter_calc = (2*(year%4)+ 4*(year%7) + 6*((year%19*19+24)%30) +5)%7 + (year%19*19+24)%30
+    # obliczenie Wielkanocy (prosty computus jak w oryginale)
+    easter_calc = (2*(year % 4) + 4*(year % 7) + 6*(((year % 19)*19 + 24) % 30) + 5) % 7 + (((year % 19)*19 + 24) % 30)
+    easter_dt = datetime.strptime(f'{year}-03-22', '%Y-%m-%d') + timedelta(easter_calc)
+    easter = easter_dt.strftime('%Y-%m-%d')
+    wet = (easter_dt + timedelta(days=1)).strftime('%Y-%m-%d')           # Poniedziałek Wielkanocny
+    cialo = (easter_dt + timedelta(days=60)).strftime('%Y-%m-%d')        # Boże Ciało
 
-    easter = (datetime.strptime(str(year) + '-03-22', '%Y-%m-%d') + timedelta(easter_calc)).strftime("%Y-%m-%d")
-    wet = (datetime.strptime(str(year) + '-03-22', '%Y-%m-%d') + timedelta(easter_calc+1)).strftime("%Y-%m-%d")
-    cialo = (datetime.strptime(str(year) + '-03-22', '%Y-%m-%d') + timedelta(easter_calc+60)).strftime("%Y-%m-%d")
-    holidays = [str(year)+'-01-01', str(year)+'-01-06', easter, wet, str(year)+'-05-01', str(year)+'-05-03', cialo,
-                str(year)+'-08-15', str(year)+'-11-01', str(year)+'-11-11', str(year)+'-12-25', str(year)+'-12-26']
+    holidays = {
+        f'{year}-01-01',  # Nowy Rok
+        f'{year}-01-06',  # Trzech Króli
+        easter,           # Wielkanoc
+        wet,              # Poniedziałek Wielkanocny
+        f'{year}-05-01',  # Święto Pracy
+        f'{year}-05-03',  # Święto Konstytucji 3 Maja
+        cialo,            # Boże Ciało
+        f'{year}-08-15',  # Wniebowzięcie NMP
+        f'{year}-11-01',  # Wszystkich Świętych
+        f'{year}-11-11',  # Narodowe Święto Niepodległości
+        f'{year}-12-25',  # Boże Narodzenie (pierwszy dzień)
+        f'{year}-12-26',  # drugi dzień BN
+    }
 
-    if datetime.strptime(date, '%Y-%m-%d').weekday() in (5,6) or date in holidays:
+    # Wigilia wolna od 2025
+    if year >= 2025:
+        holidays.add(f'{year}-12-24')
+
+    weekday = datetime.strptime(d, '%Y-%m-%d').weekday()  # 0=pon, 6=nd
+    if weekday in (5, 6):  # sob, nd
         return False
-    else:
-        return True
+    return d not in holidays
 
-
-def lastBD(date='today'):
+def lastBD(d='today'):
     """
-    Find the most recent business day before or on the given date.
-
-    This function will iterate backward from the given date until it finds a business day.
-
-    Parameters:
-    date (str or datetime): The date to start from in 'YYYY-MM-DD' format or as a datetime object. Defaults to 'today'.
-
-    Returns:
-    str: The most recent business day in 'YYYY-MM-DD' format.
+    Zwraca poprzedni dzień roboczy względem d.
     """
-    if date == 'today':
-        date = datetime.today().strftime('%Y-%m-%d')
-
+    d = _to_ymd(d)
     i = 1
-    bd = False
-    while not bd:
-        if isBusinessDay((datetime.strptime(date, '%Y-%m-%d') - timedelta(i)).strftime("%Y-%m-%d")):
-            bd = True
-            return (datetime.strptime(date, '%Y-%m-%d') - timedelta(i)).strftime("%Y-%m-%d")
-        else:
-            i += 1
+    while True:
+        prev = (datetime.strptime(d, '%Y-%m-%d') - timedelta(days=i)).strftime('%Y-%m-%d')
+        if isBusinessDay(prev):
+            return prev
+        i += 1
 
-
-def nextBD(date='today'):
+def nextBD(d='today'):
     """
-    Find the next business day after or on the given date.
-
-    This function will iterate forward from the given date until it finds a business day.
-
-    Parameters:
-    date (str or datetime): The date to start from in 'YYYY-MM-DD' format or as a datetime object. Defaults to 'today'.
-
-    Returns:
-    str: The next business day in 'YYYY-MM-DD' format.
+    Zwraca następny dzień roboczy względem d.
     """
-    if date == 'today':
-        date = datetime.today().strftime('%Y-%m-%d')
-
+    d = _to_ymd(d)
     i = 1
-    bd = False
-    while not bd:
-        if isBusinessDay((datetime.strptime(date, '%Y-%m-%d') + timedelta(i)).strftime("%Y-%m-%d")):
-            bd = True
-            return (datetime.strptime(date, '%Y-%m-%d') + timedelta(i)).strftime("%Y-%m-%d")
-        else:
-            i += 1
-
+    while True:
+        nxt = (datetime.strptime(d, '%Y-%m-%d') + timedelta(days=i)).strftime('%Y-%m-%d')
+        if isBusinessDay(nxt):
+            return nxt
+        i += 1
 
 def BDays_list(start_date, end_date):
     """
-    Generate a list of business days between two dates.
-
-    This function returns a list of dates between start_date and end_date, inclusive, with each date marked 
-    as either a business day (True) or not (False).
-
-    Parameters:
-    start_date (str or datetime): The start date in 'YYYY-MM-DD' format or as a datetime object.
-    end_date (str or datetime): The end date in 'YYYY-MM-DD' format or as a datetime object.
-
-    Returns:
-    list of lists: Each sublist contains a date in 'YYYY-MM-DD' format and a boolean indicating if it's a business day.
+    Zwraca listę [data, bool] dla zakresu od start_date do end_date włącznie.
     """
-    def daterange(start_date, end_date):
-        for n in range(int((end_date - start_date).days) + 1):
-            yield start_date + timedelta(n)
+    def daterange(a, b):
+        for n in range(int((b - a).days) + 1):
+            yield a + timedelta(n)
 
-    list_ = []
-    start_date = datetime.strptime(start_date, '%Y-%m-%d')
-    end_date = datetime.strptime(end_date, '%Y-%m-%d')
-    for single_date in daterange(start_date, end_date):
-        list_.append([single_date.strftime("%Y-%m-%d"), isBusinessDay(single_date.strftime("%Y-%m-%d"))])
-    return list_
+    out = []
+    a = datetime.strptime(_to_ymd(start_date), '%Y-%m-%d')
+    b = datetime.strptime(_to_ymd(end_date), '%Y-%m-%d')
+    for day in daterange(a, b):
+        ds = day.strftime('%Y-%m-%d')
+        out.append([ds, isBusinessDay(ds)])
+    return out

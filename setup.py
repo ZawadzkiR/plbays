@@ -11,7 +11,7 @@ classifiers = [
 
 setup(
     name='plbdays',
-    version='1.1.1',
+    version='1.2.0',
     author='Robert Zawadzki',
     author_email='r.zawadzki96@gmail.com',
     description='Business days in Poland',
