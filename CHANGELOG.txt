@@ -1,5 +1,9 @@
 Change Log
 ==========
+1.2.2 (31/10/2025)
+-------------------
+-Fix bad build
+
 1.2.0 (31/10/2025)
 -------------------
 -Including December 24th as a public holiday starting from 2025
